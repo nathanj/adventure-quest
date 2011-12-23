@@ -2,34 +2,49 @@
 
 struct player player;
 
-void init_player()
+char *prompt()
 {
-	player.health = 30;
-	player.max_health = 30;
-	player.mana = 10;
-	player.max_mana = 10;
+	char prompt[128];
 
-	player.level = 1;
-	player.strength = 10;
-	player.intelligence = 5;
-	player.dexterity = 8;
+	snprintf(prompt, sizeof(prompt), "%d/%d H, %d/%d M >",
+		 player.self.health, player.self.max_health,
+		 player.self.mana, player.self.max_mana);
+
+	return readline(prompt);
 }
 
 int main()
 {
 	char *line;
 
-	print_armor(create_random_armor());
-	print_armor(create_random_armor());
-	print_armor(create_random_armor());
+	struct room room;
+	struct creature *bat = create_bat();
+
+	room.creatures = bat;
+	room.items = NULL;
+
+	init_player();
 
 	while (1) {
-		line = readline("> ");
-		printf("the line is %s\n", line);
-		if (strcmp(line, "quit") == 0)
+		printf("In this room, there are:\n");
+		printf("%s\n", room.creatures->name);
+
+		line = prompt();
+
+		if (strcmp(line, "attack") == 0) {
+			player.self.attack(&player.self, room.creatures);
+		} else if (strcmp(line, "quit") == 0) {
 			break;
+		}
+
+		if (room.creatures->health > 0)
+			room.creatures->attack(room.creatures,
+					       &player.self);
+
 		free(line);
 	}
+
+	free_creature(bat);
 
 	return 0;
 }
