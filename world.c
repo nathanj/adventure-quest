@@ -2,26 +2,40 @@
 
 struct room world[10][10][10];
 
-void print_map()
+void print_room(int i, int j)
 {
 	int l = player.world_level;
 	int x = player.world_x;
 	int y = player.world_y;
+
+	struct room *room = &world[l][i][j];
+
+	if (x == i && y == j)
+		printf(B_RED "X");
+	else if (room->creatures)
+		printf("%s%c",
+		       room->creatures->color,
+		       room->creatures->symbol);
+	else if (room->gold)
+		printf(B_YELLOW "$");
+	else if (room->stairs_down)
+		printf(">");
+	else if (room->stairs_up)
+		printf("<");
+	else
+		printf(" ");
+
+	printf(NORMAL);
+}
+
+void print_map()
+{
 	int i, j;
 
 	for (i = 0; i < 10; i++) {
 		for (j = 0; j < 10; j++) {
 			printf("[");
-			if (x == i && y == j)
-				printf(B_RED "X" NORMAL);
-			else if (world[l][i][j].creatures)
-				printf(B_BLUE "x" NORMAL);
-			else if (world[l][i][j].stairs_down)
-				printf(">");
-			else if (world[l][i][j].stairs_up)
-				printf("<");
-			else
-				printf(" ");
+			print_room(i, j);
 			printf("]");
 		}
 		printf("\n");
@@ -75,4 +89,14 @@ struct room *current_room()
 
 	return &world[l][x][y];
 }
+
+void room_remove_creature(struct creature *creature)
+{
+	struct room *room = current_room();
+
+	(void) creature;
+
+	room->creatures = NULL;
+}
+
 

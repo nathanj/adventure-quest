@@ -12,13 +12,13 @@ const char *suffixes[] = {
 #define NUM_PREFIXES (sizeof(prefixes) / sizeof(prefixes[0]))
 #define NUM_SUFFIXES (sizeof(suffixes) / sizeof(suffixes[0]))
 
-struct armor unique_armors[] = {
-	{ {"Fuzzy Dice"}, 10, 0, -1, 0 },
+struct item unique_armors[] = {
+	{ "Fuzzy Dice", ITEM_ARMOR, 10, 0, -1, 0 },
 };
 
-void print_armor(struct armor *armor)
+void print_armor(struct item *armor)
 {
-	printf("%s (%d AC", armor->item.name, armor->armour_class);
+	printf("%s (%d AC", armor->name, armor->armour_class);
 	if (armor->strength)
 		printf(", %d STR", armor->strength);
 	if (armor->intelligence)
@@ -28,17 +28,18 @@ void print_armor(struct armor *armor)
 	printf(")\n");
 }
 
-struct armor *create_random_armor()
+struct item *create_random_armor()
 {
 	int prefix = rand() % NUM_PREFIXES;
 	int suffix = rand() % NUM_SUFFIXES;
 	int rc;
 
-	struct armor *armor;
+	struct item *armor;
 
-	armor = calloc(1, sizeof(struct armor));
+	armor = calloc(1, sizeof(struct item));
+	assert(armor);
 
-	rc = asprintf(&armor->item.name, "%s Leather Armor %s",
+	rc = asprintf(&armor->name, "%s Leather Armor %s",
 		      prefixes[prefix], suffixes[suffix]);
 	assert(rc != -1);
 

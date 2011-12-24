@@ -26,6 +26,9 @@ void init_player()
 {
 	memset(&player, 0, sizeof(player));
 
+	player.self.color = B_RED;
+	player.self.symbol = 'X';
+
 	player.self.health = 30;
 	player.self.max_health = 30;
 	player.self.mana = 10;
@@ -39,5 +42,16 @@ void init_player()
 	player.self.attack = player_attack;
 	player.self.do_hurt = player_hurt;
 	player.move = player_move;
+
+	INIT_LIST_HEAD(&player.inventory);
 }
 
+void print_inventory()
+{
+	struct item *pos;
+	printf("You have the following items:\n");
+
+	list_for_each_entry(pos, &player.inventory, list) {
+		printf("%s\n", pos->name);
+	}
+}
