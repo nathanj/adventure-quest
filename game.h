@@ -23,8 +23,11 @@ struct creature {
 	int dexterity;
 	int level;
 
+	struct list_head list;
+
 	void (*attack) (struct creature *this, struct creature *other);
 	void (*do_hurt) (struct creature *this, struct creature *hurter);
+	void (*die) (struct creature *this);
 };
 
 struct player {
@@ -46,10 +49,20 @@ enum item_type {
 	ITEM_ARMOR
 };
 
+enum armor_location {
+	ARMOR_HEAD,
+	ARMOR_TORSO,
+	ARMOR_FEET,
+};
+
 struct item {
 	char *name;
+	const char *color;
+	char symbol;
+
 	enum item_type type;
 
+	enum armor_location location;
 	int armour_class;
 	int strength;
 	int intelligence;
@@ -66,8 +79,8 @@ struct room {
 
 	int gold;
 
-	struct creature *creatures;
-	struct item *items;
+	struct list_head creatures;
+	struct list_head items;
 };
 
 struct item *create_random_armor();
@@ -76,14 +89,16 @@ void print_armor(struct item *armor);
 void free_creature(struct creature *creature);
 
 struct creature *create_bat();
+struct creature *create_slime();
 
 void init_player();
 
 void init_world();
 void print_map();
 struct room *current_room();
-void room_remove_creature(struct creature *creature);
+void room_remove_dead_creatures();
 void print_inventory();
+void print_current_room_contents();
 
 extern struct player player;
 

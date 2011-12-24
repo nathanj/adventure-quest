@@ -11,8 +11,10 @@ void player_attack(struct creature *this, struct creature *creature)
 void player_hurt(struct creature *this, struct creature *hurter)
 {
 	this->health -= hurter->strength;
-	if (this->health <= 0)
+	if (this->health <= 0) {
 		printf("You die!\n");
+		exit(0);
+	}
 }
 
 void player_move(int x, int y, int z)

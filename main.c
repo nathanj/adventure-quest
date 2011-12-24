@@ -22,6 +22,7 @@ int main()
 {
 	char *line;
 	struct room *room;
+	struct creature *creature;
 
 	init_world();
 	init_player();
@@ -33,25 +34,25 @@ int main()
 		print_map();
 
 		printf("In this room, there are:\n");
-		if (room->creatures)
-			printf("%s\n", room->creatures->name);
-
-		if (room->gold)
-			printf(YELLOW "%d gold coins.\n" NORMAL, room->gold);
-
-		if (room->items)
-			printf("%s\n", room->items->name);
+		print_current_room_contents();
 
 		line = prompt();
 
 		if (strcmp(line, "attack") == 0 || strcmp(line, "a") == 0) {
-			if (room->creatures) {
-				player.self.attack(&player.self,
-						   room->creatures);
+			if (!list_empty(&room->creatures)) {
+				int first = 1;
 
-				if (room->creatures->health > 0)
-					room->creatures->attack(room->creatures,
-								&player.self);
+				list_for_each_entry(creature, &room->creatures, list) {
+					if (first) {
+						player.self.attack(&player.self,
+								   creature);
+						first = 0;
+					}
+
+					if (creature->health > 0)
+						creature->attack(creature,
+								 &player.self);
+				}
 			} else {
 				printf("Attack who?\n");
 			}
@@ -76,10 +77,15 @@ int main()
 				room->gold = 0;
 			}
 
-			if (room->items) {
-				printf("You take %s.\n", room->items->name);
-				list_add_tail(&room->items->list, &player.inventory);
-				room->items = NULL;
+			if (!list_empty(&room->items)) {
+				struct item *item, *n;
+
+				list_for_each_entry_safe(item, n, &room->items, list) {
+					printf("You take %s.\n", item->name);
+					list_add_tail(&item->list, &player.inventory);
+				}
+
+				INIT_LIST_HEAD(&room->items);
 			}
 		} else if (strcmp(line, "q") == 0) {
 			free(line);
@@ -88,8 +94,7 @@ int main()
 			printf("Unknown command!\n");
 		}
 
-		if (room->creatures && room->creatures->health <= 0)
-			room_remove_creature(room->creatures);
+		room_remove_dead_creatures();
 
 		free(line);
 	}

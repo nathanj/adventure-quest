@@ -8,7 +8,7 @@ void bat_attack(struct creature *this, struct creature *player)
 	player->do_hurt(player, this);
 }
 
-void die(struct creature *this)
+void bat_die(struct creature *this)
 {
 	struct room *room = current_room();
 	int gold = rand() % 20;
@@ -18,7 +18,7 @@ void die(struct creature *this)
 	room->gold += gold;
 
 	printf("%s drops %s!\n", this->name, armor->name);
-	room->items = armor;
+	list_add_tail(&armor->list, &room->items);
 }
 
 void bat_hurt(struct creature *this, struct creature *hurter)
@@ -26,7 +26,7 @@ void bat_hurt(struct creature *this, struct creature *hurter)
 	this->health -= hurter->strength;
 	if (this->health <= 0) {
 		printf("%s dies!\n", this->name);
-		die(this);
+		this->die(this);
 	}
 }
 
@@ -38,7 +38,7 @@ struct creature *create_bat()
 	bat = calloc(1, sizeof(struct creature));
 	assert(bat);
 
-	bat->color = B_BLUE;
+	bat->color = BLUE;
 	bat->symbol = 'b';
 
 	rc = asprintf(&bat->name, "a bat");
@@ -51,6 +51,7 @@ struct creature *create_bat()
 
 	bat->do_hurt = bat_hurt;
 	bat->attack = bat_attack;
+	bat->die = bat_die;
 
 	return bat;
 }

@@ -13,7 +13,7 @@ const char *suffixes[] = {
 #define NUM_SUFFIXES (sizeof(suffixes) / sizeof(suffixes[0]))
 
 struct item unique_armors[] = {
-	{ "Fuzzy Dice", ITEM_ARMOR, 10, 0, -1, 0 },
+	{ "Fuzzy Dice", B_WHITE, '#', ITEM_ARMOR, ARMOR_HEAD, 10, 0, -1, 0 },
 };
 
 void print_armor(struct item *armor)
@@ -39,10 +39,13 @@ struct item *create_random_armor()
 	armor = calloc(1, sizeof(struct item));
 	assert(armor);
 
+	armor->color = B_CYAN;
+	armor->symbol = '(';
 	rc = asprintf(&armor->name, "%s Leather Armor %s",
 		      prefixes[prefix], suffixes[suffix]);
 	assert(rc != -1);
 
+	armor->location = ARMOR_TORSO;
 	armor->armour_class = 3 + rand() % 10;
 
 	return armor;

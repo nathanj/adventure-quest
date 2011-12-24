@@ -12,11 +12,15 @@ void print_room(int i, int j)
 
 	if (x == i && y == j)
 		printf(B_RED "X");
-	else if (room->creatures)
-		printf("%s%c",
-		       room->creatures->color,
-		       room->creatures->symbol);
-	else if (room->gold)
+	else if (!list_empty(&room->creatures)) {
+		struct creature *creature = list_entry(room->creatures.next,
+						       struct creature, list);
+		printf("%s%c", creature->color, creature->symbol);
+	} else if (!list_empty(&room->items)) {
+		struct item *item = list_entry(room->items.next,
+					       struct item, list);
+		printf("%s%c", item->color, item->symbol);
+	} else if (room->gold)
 		printf(B_YELLOW "$");
 	else if (room->stairs_down)
 		printf(">");
@@ -62,20 +66,44 @@ retry:
 
 void create_monsters()
 {
-	int num = rand() % 10;
+	int num = 10;
 	int n, i, j;
+	struct creature *creature;
 
 	for (n = 0; n < num; n++) {
 		i = rand() % 10;
 		j = rand() % 10;
 
-		world[0][i][j].creatures = create_bat();
+		switch(rand() % 2) {
+		case 0:
+			creature = create_bat();
+			break;
+		case 1:
+			creature = create_slime();
+			break;
+		default:
+			assert(0);
+			break;
+		}
+
+		list_add_tail(&creature->list, &world[0][i][j].creatures);
 	}
 }
 
 void init_world()
 {
+	int l, i, j;
+
 	memset(world, 0, sizeof(world));
+
+	for (l = 0; l < 10; l++) {
+		for (i = 0; i < 10; i++) {
+			for (j = 0; j < 10; j++) {
+				INIT_LIST_HEAD(&world[l][i][j].creatures);
+				INIT_LIST_HEAD(&world[l][i][j].items);
+			}
+		}
+	}
 
 	create_stairs();
 	create_monsters();
@@ -90,13 +118,40 @@ struct room *current_room()
 	return &world[l][x][y];
 }
 
-void room_remove_creature(struct creature *creature)
+void room_remove_dead_creatures()
+{
+	struct room *room = current_room();
+	struct list_head *pos, *n;
+	struct creature *creature;
+
+	list_for_each_safe(pos, n, &room->creatures) {
+		creature = list_entry(pos, struct creature, list);
+		if (creature->health <= 0)
+			list_del(pos);
+	}
+}
+
+void print_current_room_contents()
 {
 	struct room *room = current_room();
 
-	(void) creature;
+	if (!list_empty(&room->creatures)) {
+		struct creature *creature;
 
-	room->creatures = NULL;
+		list_for_each_entry(creature, &room->creatures, list) {
+			printf("%s\n", creature->name);
+		}
+	}
+
+	if (room->gold)
+		printf(YELLOW "%d gold coins.\n" NORMAL, room->gold);
+
+	if (!list_empty(&room->items)) {
+		struct item *item;
+
+		list_for_each_entry(item, &room->items, list) {
+			printf("%s\n", item->name);
+		}
+	}
 }
-
 
