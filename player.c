@@ -1,7 +1,5 @@
 #include "game.h"
 
-extern struct player player;
-
 void player_attack(struct creature *this, struct creature *creature)
 {
 	printf("You attack %s for %d damage!\n",
@@ -17,8 +15,17 @@ void player_hurt(struct creature *this, struct creature *hurter)
 		printf("You die!\n");
 }
 
+void player_move(int x, int y, int z)
+{
+	player.world_level += z;
+	player.world_x += x;
+	player.world_y += y;
+}
+
 void init_player()
 {
+	memset(&player, 0, sizeof(player));
+
 	player.self.health = 30;
 	player.self.max_health = 30;
 	player.self.mana = 10;
@@ -31,5 +38,6 @@ void init_player()
 
 	player.self.attack = player_attack;
 	player.self.do_hurt = player_hurt;
+	player.move = player_move;
 }
 

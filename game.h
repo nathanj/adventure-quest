@@ -8,6 +8,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include "colors.h"
+
 struct creature {
 	char *name;
 	int health, max_health;
@@ -24,7 +26,15 @@ struct creature {
 struct player {
 	struct creature self;
 
+	int gold;
+
+	int world_level;
+	int world_x;
+	int world_y;
+
 	struct item *inventory;
+
+	void (*move) (int x, int y, int z);
 };
 
 struct item {
@@ -41,6 +51,9 @@ struct armor {
 };
 
 struct room {
+	int stairs_down : 1;
+	int stairs_up : 1;
+
 	struct creature *creatures;
 	struct item *items;
 };
@@ -53,6 +66,12 @@ void free_creature(struct creature *creature);
 struct creature *create_bat();
 
 void init_player();
+
+void init_world();
+void print_map();
+struct room *current_room();
+
+extern struct player player;
 
 #endif /* __GAME_H__ */
 

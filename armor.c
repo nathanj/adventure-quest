@@ -9,7 +9,6 @@ const char *suffixes[] = {
 	"of Destruction"
 };
 
-
 #define NUM_PREFIXES (sizeof(prefixes) / sizeof(prefixes[0]))
 #define NUM_SUFFIXES (sizeof(suffixes) / sizeof(suffixes[0]))
 
