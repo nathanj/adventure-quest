@@ -48,6 +48,7 @@ struct player {
 	struct list_head inventory;
 
 	void (*move) (int x, int y, int z);
+	void (*equip) (struct player *this);
 };
 
 struct store {
@@ -77,7 +78,7 @@ struct item {
 	enum item_type type;
 
 	enum armor_location location;
-	int armour_class;
+	int armor_class;
 	int strength;
 	int intelligence;
 	int dexterity;

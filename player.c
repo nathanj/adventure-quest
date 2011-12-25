@@ -8,9 +8,34 @@ void player_attack(struct creature *this, struct creature *creature)
 	creature->do_hurt(creature, this);
 }
 
+int armor_class(struct player *this)
+{
+	int ac = 0;
+
+	if (this->armor_head)
+		ac += this->armor_head->armor_class;
+	if (this->armor_torso)
+		ac += this->armor_torso->armor_class;
+	if (this->armor_feet)
+		ac += this->armor_feet->armor_class;
+
+	return ac;
+}
+
 void player_hurt(struct creature *this, struct creature *hurter)
 {
-	this->health -= hurter->strength;
+	int ac;
+
+	ac = armor_class((struct player *) this);
+	if (ac == 0) {
+		this->health -= hurter->strength;
+	} else if (ac < hurter->strength) {
+		printf("Your armor absorbs some of the blow.\n");
+		this->health -= hurter->strength - ac;
+	} else {
+		printf("Your armor absorbs all of the blow!\n");
+	}
+
 	if (this->health <= 0) {
 		printf("You die!\n");
 		exit(0);
@@ -50,6 +75,33 @@ void player_give_experience(struct creature *this, int experience)
 	}
 }
 
+void player_equip(struct player *this)
+{
+	struct item *item;
+
+	list_for_each_entry(item, &player.inventory, list) {
+		if (item->type == ITEM_ARMOR) {
+			switch (item->location) {
+			case ARMOR_HEAD:
+				printf("You equip %s on your head.\n",
+				       item->name);
+				this->armor_head = item;
+				break;
+			case ARMOR_TORSO:
+				printf("You equip %s on your torso.\n",
+				       item->name);
+				this->armor_torso = item;
+				break;
+			case ARMOR_FEET:
+				printf("You equip %s on your feet.\n",
+				       item->name);
+				this->armor_feet = item;
+				break;
+			}
+		}
+	}
+}
+
 void init_player()
 {
 	memset(&player, 0, sizeof(player));
@@ -71,16 +123,27 @@ void init_player()
 	player.self.do_hurt = player_hurt;
 	player.self.give_experience = player_give_experience;
 	player.move = player_move;
+	player.equip = player_equip;
 
 	INIT_LIST_HEAD(&player.inventory);
 }
 
 void print_inventory()
 {
-	struct item *pos;
+	struct item *item;
 	printf("You have the following items:\n");
 
-	list_for_each_entry(pos, &player.inventory, list) {
-		printf("%s\n", pos->name);
+	list_for_each_entry(item, &player.inventory, list) {
+		if (item == player.armor_head)
+			printf("(Equipped on head) ");
+		else if (item == player.armor_torso)
+			printf("(Equipped on torso) ");
+		else if (item == player.armor_feet)
+			printf("(Equipped on feet) ");
+
+		if (item->type == ITEM_ARMOR)
+			print_armor(item);
+		else
+			printf("%s\n", item->name);
 	}
 }

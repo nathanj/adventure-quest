@@ -76,6 +76,8 @@ int main()
 			print_inventory();
 		} else if (strcmp(line, "b") == 0) {
 			buy_item(room->store);
+		} else if (strcmp(line, "x") == 0) {
+			player.equip(&player);
 		} else if (strcmp(line, "q") == 0) {
 			struct item *item, *n;
 			int used = 0;

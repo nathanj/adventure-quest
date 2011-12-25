@@ -18,7 +18,7 @@ struct item unique_armors[] = {
 
 void print_armor(struct item *armor)
 {
-	printf("%s (%d AC", armor->name, armor->armour_class);
+	printf("%s (%d AC", armor->name, armor->armor_class);
 	if (armor->strength)
 		printf(", %d STR", armor->strength);
 	if (armor->intelligence)
@@ -47,7 +47,7 @@ struct item *create_random_armor()
 
 	armor->type = ITEM_ARMOR;
 	armor->location = ARMOR_TORSO;
-	armor->armour_class = 3 + rand() % 10;
+	armor->armor_class = 3 + rand() % 10;
 
 	return armor;
 }
