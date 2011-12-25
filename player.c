@@ -24,6 +24,32 @@ void player_move(int x, int y, int z)
 	player.world_y += y;
 }
 
+void level_up(struct creature *this)
+{
+	printf(B_MAGENTA "You gain a level!\n" NORMAL);
+
+	this->level++;
+
+	this->strength += rand() % 3 + 1;
+	this->intelligence += rand() % 3 + 1;
+	this->dexterity += rand() % 3 + 1;
+
+	this->max_health += rand() % 10 + 5;
+	this->max_mana += rand() % 5 + 3;
+	this->health = this->max_health;
+	this->mana = this->max_mana;
+}
+
+void player_give_experience(struct creature *this, int experience)
+{
+	this->experience += experience;
+	if (this->experience >= 100 * this->level)
+	{
+		this->experience -= 100 * this->level;
+		level_up(this);
+	}
+}
+
 void init_player()
 {
 	memset(&player, 0, sizeof(player));
@@ -43,6 +69,7 @@ void init_player()
 
 	player.self.attack = player_attack;
 	player.self.do_hurt = player_hurt;
+	player.self.give_experience = player_give_experience;
 	player.move = player_move;
 
 	INIT_LIST_HEAD(&player.inventory);

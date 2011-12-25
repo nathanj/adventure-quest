@@ -9,10 +9,14 @@ char *prompt()
 	snprintf(prompt, sizeof(prompt),
 		 GREEN "%d/%d " NORMAL "Health, "
 		 BLUE "%d/%d " NORMAL "Mana, "
+		 "Level " CYAN "%d" NORMAL ","
+		 CYAN" %d " NORMAL "Experience, "
 		 YELLOW "%d " NORMAL "Gold "
 		 "> ",
 		 player.self.health, player.self.max_health,
 		 player.self.mana, player.self.max_mana,
+		 player.self.level,
+		 player.self.experience,
 		 player.gold);
 
 	return readline(prompt);
@@ -70,6 +74,25 @@ int main()
 			player.move(0, 0, 1);
 		} else if (strcmp(line, "i") == 0) {
 			print_inventory();
+		} else if (strcmp(line, "b") == 0) {
+			buy_item(room->store);
+		} else if (strcmp(line, "q") == 0) {
+			struct item *item, *n;
+			int used = 0;
+
+			list_for_each_entry_safe(item, n, &player.inventory, list) {
+				if (item->type == ITEM_USE) {
+					printf("You use %s.\n", item->name);
+					item->interact(item, &player);
+					list_del(&item->list);
+					used = 1;
+					break;
+				}
+			}
+
+			if (!used) {
+				printf("You have no items that can be used!\n");
+			}
 		} else if (strcmp(line, "t") == 0) {
 			if (room->gold) {
 				printf("You take %d gold coins.\n", room->gold);
@@ -87,7 +110,7 @@ int main()
 
 				INIT_LIST_HEAD(&room->items);
 			}
-		} else if (strcmp(line, "q") == 0) {
+		} else if (strcmp(line, "quit") == 0) {
 			free(line);
 			break;
 		} else {

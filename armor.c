@@ -36,7 +36,7 @@ struct item *create_random_armor()
 
 	struct item *armor;
 
-	armor = calloc(1, sizeof(struct item));
+	armor = calloc(1, sizeof(*armor));
 	assert(armor);
 
 	armor->color = B_CYAN;
@@ -45,6 +45,7 @@ struct item *create_random_armor()
 		      prefixes[prefix], suffixes[suffix]);
 	assert(rc != -1);
 
+	armor->type = ITEM_ARMOR;
 	armor->location = ARMOR_TORSO;
 	armor->armour_class = 3 + rand() % 10;
 

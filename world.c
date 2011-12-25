@@ -22,6 +22,9 @@ void print_room(int i, int j)
 		printf("%s%c", item->color, item->symbol);
 	} else if (room->gold)
 		printf(B_YELLOW "$");
+	else if (room->store) {
+		printf("%s%c", room->store->color, room->store->symbol);
+	}
 	else if (room->stairs_down)
 		printf(">");
 	else if (room->stairs_up)
@@ -90,6 +93,32 @@ void create_monsters()
 	}
 }
 
+void create_store()
+{
+	struct store *store;
+
+	store = calloc(1, sizeof(*store));
+
+	asprintf(&store->name, "Merlin's Shop");
+	store->symbol = '@';
+	store->color = B_MAGENTA;
+	INIT_LIST_HEAD(&store->inventory);
+
+	list_add_tail(&(create_random_potion()->list), &store->inventory);
+	list_add_tail(&(create_random_potion()->list), &store->inventory);
+	list_add_tail(&(create_random_potion()->list), &store->inventory);
+	list_add_tail(&(create_random_potion()->list), &store->inventory);
+	list_add_tail(&(create_random_potion()->list), &store->inventory);
+
+	list_add_tail(&(create_random_armor()->list), &store->inventory);
+	list_add_tail(&(create_random_armor()->list), &store->inventory);
+	list_add_tail(&(create_random_armor()->list), &store->inventory);
+	list_add_tail(&(create_random_armor()->list), &store->inventory);
+	list_add_tail(&(create_random_armor()->list), &store->inventory);
+
+	world[0][5][5].store = store;
+}
+
 void init_world()
 {
 	int l, i, j;
@@ -107,6 +136,7 @@ void init_world()
 
 	create_stairs();
 	create_monsters();
+	create_store();
 }
 
 struct room *current_room()
@@ -126,8 +156,10 @@ void room_remove_dead_creatures()
 
 	list_for_each_safe(pos, n, &room->creatures) {
 		creature = list_entry(pos, struct creature, list);
-		if (creature->health <= 0)
+		if (creature->health <= 0) {
 			list_del(pos);
+			free_creature(creature);
+		}
 	}
 }
 
@@ -153,5 +185,14 @@ void print_current_room_contents()
 			printf("%s\n", item->name);
 		}
 	}
+
+	if (room->stairs_down)
+		printf("Stairs leading down.\n");
+
+	if (room->stairs_up)
+		printf("Stairs leading up.\n");
+
+	if (room->store)
+		print_store_inventory(room->store);
 }
 

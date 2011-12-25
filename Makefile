@@ -1,6 +1,6 @@
 TARGET  := main
 CC      := gcc
-CFLAGS  := --std=gnu99 -D_GNU_SOURCE -Wall -g -O0 -MMD
+CFLAGS  := --std=gnu99 -D_GNU_SOURCE -Wall -Werror -g -O0 -MMD
 LDFLAGS := -lreadline
 SRCS    := $(wildcard *.c)
 OBJS    := $(SRCS:.c=.o)

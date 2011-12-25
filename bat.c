@@ -11,14 +11,24 @@ void bat_attack(struct creature *this, struct creature *player)
 void bat_die(struct creature *this)
 {
 	struct room *room = current_room();
-	int gold = rand() % 20;
-	struct item *armor = create_random_armor();
+	int gold = p(90) ? rand() % 10 : 0;
+	struct item *armor = p(10) ? create_random_armor() : NULL;
+	struct item *potion = p(50) ? create_random_potion() : NULL;
 
-	printf("%s drops %d gold!\n", this->name, gold);
-	room->gold += gold;
+	if (gold) {
+		printf("%s drops %d gold!\n", this->name, gold);
+		room->gold += gold;
+	}
 
-	printf("%s drops %s!\n", this->name, armor->name);
-	list_add_tail(&armor->list, &room->items);
+	if (armor) {
+		printf("%s drops %s!\n", this->name, armor->name);
+		list_add_tail(&armor->list, &room->items);
+	}
+
+	if (potion) {
+		printf("%s drops %s!\n", this->name, potion->name);
+		list_add_tail(&potion->list, &room->items);
+	}
 }
 
 void bat_hurt(struct creature *this, struct creature *hurter)
@@ -27,6 +37,7 @@ void bat_hurt(struct creature *this, struct creature *hurter)
 	if (this->health <= 0) {
 		printf("%s dies!\n", this->name);
 		this->die(this);
+		hurter->give_experience(hurter, this->experience);
 	}
 }
 
@@ -35,7 +46,7 @@ struct creature *create_bat()
 	int rc;
 	struct creature *bat;
 
-	bat = calloc(1, sizeof(struct creature));
+	bat = calloc(1, sizeof(*bat));
 	assert(bat);
 
 	bat->color = BLUE;
@@ -48,6 +59,8 @@ struct creature *create_bat()
 	bat->strength = 3;
 	bat->intelligence = 3;
 	bat->dexterity = 3;
+	bat->level = 1;
+	bat->experience = 20;
 
 	bat->do_hurt = bat_hurt;
 	bat->attack = bat_attack;
