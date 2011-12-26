@@ -3,6 +3,7 @@
 enum state {
 	WORLD,
 	INVENTORY,
+	DROP,
 	STORE
 };
 
@@ -12,8 +13,12 @@ void print_prompt()
 {
 	move(12, 0);
 
-	aprintw(GREEN, "%d/%d ",
-		player.self.health, player.self.max_health);
+	if (player.self.health < player.self.max_health * 0.20)
+		attrset(B_RED);
+	else
+		attrset(GREEN);
+	printw("%d/%d ",
+	       player.self.health, player.self.max_health);
 	aprintw(NORMAL, "Health, ");
 	aprintw(BLUE, "%d/%d ", player.self.mana, player.self.max_mana);
 	aprintw(NORMAL, "Mana, Level ");
@@ -21,7 +26,7 @@ void print_prompt()
 	aprintw(NORMAL, ", ");
 	aprintw(CYAN, "%d ", player.self.experience);
 	aprintw(NORMAL, "Experience, ");
-	aprintw(YELLOW, "%d ", player.self.experience);
+	aprintw(YELLOW, "%d ", player.gold);
 	aprintw(NORMAL, "Gold");
 }
 
@@ -71,6 +76,7 @@ void draw()
 		print_messages();
 		break;
 	case INVENTORY:
+	case DROP:
 		clear();
 		print_inventory();
 		break;
@@ -117,11 +123,15 @@ void handle_take()
 	if (!list_empty(&room->items)) {
 
 		list_for_each_entry_safe(item, n, &room->items, list) {
+			if (player.num_items >= 20) {
+				message(NORMAL, "Your inventory is full!");
+				break;
+			}
 			message(NORMAL, "You take %s.", item->name);
+			list_del(&item->list);
 			list_add_tail(&item->list, &player.inventory);
+			player.num_items++;
 		}
-
-		INIT_LIST_HEAD(&room->items);
 	}
 }
 
@@ -151,11 +161,14 @@ void handle_world_input(int c)
 	case '>':
 		player.go(0, 0, 1);
 		break;
-	case 't':
+	case ',':
 		handle_take();
 		break;
 	case 'i':
 		state = INVENTORY;
+		break;
+	case 'd':
+		state = DROP;
 		break;
 	case 'b':
 		if (room->store)
@@ -178,6 +191,19 @@ void handle_inventory_input(int c)
 		break;
 	default:
 		if (use_item(c - 'a'))
+			state = WORLD;
+		break;
+	}
+}
+
+void handle_drop_input(int c)
+{
+	switch (c) {
+	case 'z':
+		state = WORLD;
+		break;
+	default:
+		if (drop_item(c - 'a'))
 			state = WORLD;
 		break;
 	}
@@ -206,6 +232,9 @@ void handle_input(int c)
 		break;
 	case INVENTORY:
 		handle_inventory_input(c);
+		break;
+	case DROP:
+		handle_drop_input(c);
 		break;
 	case STORE:
 		handle_store_input(c);

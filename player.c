@@ -133,6 +133,7 @@ void init_player()
 	player.go = player_go;
 	player.equip = player_equip;
 
+	player.num_items = 0;
 	INIT_LIST_HEAD(&player.inventory);
 }
 
@@ -177,6 +178,7 @@ int use_item(int i)
 				message(NORMAL, "You use %s.", item->name);
 				item->interact(item, &player);
 				list_del(&item->list);
+				player.num_items--;
 				return 1;
 				break;
 			case ITEM_ARMOR:
@@ -184,6 +186,26 @@ int use_item(int i)
 				return 1;
 				break;
 			}
+		}
+	}
+
+	return 0;
+}
+
+int drop_item(int i)
+{
+	struct item *item, *n;
+	struct room *room = current_room();
+
+	list_for_each_entry_safe(item, n, &player.inventory, list) {
+		if (i-- == 0) {
+			message(NORMAL, "You drop %s.", item->name);
+
+			list_del(&item->list);
+			player.num_items--;
+			list_add_tail(&item->list, &room->items);
+
+			return 1;
 		}
 	}
 

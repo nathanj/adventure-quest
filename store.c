@@ -37,6 +37,11 @@ int buy_item(struct store *store, int i)
 	struct item *item, *n;
 	int price;
 
+	if (player.num_items >= 20) {
+		message(NORMAL, "Your inventory is full!");
+		return 1;
+	}
+
 	list_for_each_entry_safe(item, n, &store->inventory, list) {
 		if (i-- == 0) {
 			price = calc_price(item);
@@ -52,6 +57,7 @@ int buy_item(struct store *store, int i)
 			player.gold -= price;
 			list_del(&item->list);
 			list_add_tail(&item->list, &player.inventory);
+			player.num_items++;
 
 			return 1;
 		}

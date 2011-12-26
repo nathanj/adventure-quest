@@ -47,6 +47,7 @@ struct player {
 	struct item *armor_torso;
 	struct item *armor_feet;
 
+	int num_items;
 	struct list_head inventory;
 
 	void (*go) (int x, int y, int z);
@@ -130,6 +131,7 @@ void message(int color, const char *fmt, ...);
 void print_messages();
 void finish(int sig);
 int use_item(int i);
+int drop_item(int i);
 
 extern struct player player;
 

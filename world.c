@@ -70,32 +70,37 @@ retry:
 void create_monsters()
 {
 	int num = 10;
-	int n, i, j;
+	int n, i, j, l;
 	struct creature *creature;
 
-	for (n = 0; n < num; n++) {
-		i = rand() % 10;
-		j = rand() % 10;
+	for (l = 0; l < num; l++) {
+		for (n = 0; n < num; n++) {
+			i = rand() % 10;
+			j = rand() % 10;
 
-		switch (rand() % 2) {
-		case 0:
-			creature = create_bat();
-			break;
-		case 1:
-			creature = create_slime();
-			break;
-		default:
-			assert(0);
-			break;
+			switch (rand() % 2) {
+			case 0:
+				creature = create_bat();
+				break;
+			case 1:
+				creature = create_slime();
+				break;
+			default:
+				assert(0);
+				break;
+			}
+
+			list_add_tail(&creature->list,
+				      &world[l][i][j].creatures);
 		}
-
-		list_add_tail(&creature->list, &world[0][i][j].creatures);
 	}
 }
 
 void create_store()
 {
 	struct store *store;
+	int i, j;
+	struct room *room;
 
 	store = calloc(1, sizeof(*store));
 
@@ -116,7 +121,15 @@ void create_store()
 	list_add_tail(&(create_random_armor()->list), &store->inventory);
 	list_add_tail(&(create_random_armor()->list), &store->inventory);
 
-	world[0][5][5].store = store;
+retry:
+	i = rand() % 10;
+	j = rand() % 10;
+	room = &world[0][i][j];
+	if (room->stairs_up || room->stairs_down
+	    || !list_empty(&room->creatures))
+		goto retry;
+
+	room->store = store;
 }
 
 void init_world()
