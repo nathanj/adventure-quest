@@ -10,42 +10,42 @@ void print_room(int i, int j)
 
 	struct room *room = &world[l][i][j];
 
-	if (x == i && y == j)
-		printf(B_RED "X");
-	else if (!list_empty(&room->creatures)) {
+	if (x == i && y == j) {
+		aprintw(B_RED, "X");
+	} else if (!list_empty(&room->creatures)) {
 		struct creature *creature = list_entry(room->creatures.next,
 						       struct creature, list);
-		printf("%s%c", creature->color, creature->symbol);
+		aprintw(creature->color, "%c", creature->symbol);
 	} else if (!list_empty(&room->items)) {
 		struct item *item = list_entry(room->items.next,
 					       struct item, list);
-		printf("%s%c", item->color, item->symbol);
-	} else if (room->gold)
-		printf(B_YELLOW "$");
-	else if (room->store) {
-		printf("%s%c", room->store->color, room->store->symbol);
+		aprintw(item->color, "%c", item->symbol);
+	} else if (room->gold) {
+		aprintw(B_YELLOW, "$");
+	} else if (room->store) {
+		aprintw(room->store->color, "%c", room->store->symbol);
+	} else if (room->stairs_down) {
+		printw(">");
+	} else if (room->stairs_up) {
+		printw("<");
+	} else {
+		printw(" ");
 	}
-	else if (room->stairs_down)
-		printf(">");
-	else if (room->stairs_up)
-		printf("<");
-	else
-		printf(" ");
-
-	printf(NORMAL);
 }
 
 void print_map()
 {
 	int i, j;
 
+	move(0, 0);
+
 	for (i = 0; i < 10; i++) {
+		move(i, 0);
 		for (j = 0; j < 10; j++) {
-			printf("[");
+			aprintw(NORMAL, "[");
 			print_room(i, j);
-			printf("]");
+			aprintw(NORMAL, "]");
 		}
-		printf("\n");
 	}
 }
 
@@ -77,7 +77,7 @@ void create_monsters()
 		i = rand() % 10;
 		j = rand() % 10;
 
-		switch(rand() % 2) {
+		switch (rand() % 2) {
 		case 0:
 			creature = create_bat();
 			break;
@@ -99,7 +99,7 @@ void create_store()
 
 	store = calloc(1, sizeof(*store));
 
-	asprintf(&store->name, "Merlin's Shop");
+	asprintf(&store->name, "Merlin's Magic Shop");
 	store->symbol = '@';
 	store->color = B_MAGENTA;
 	INIT_LIST_HEAD(&store->inventory);
@@ -166,33 +166,36 @@ void room_remove_dead_creatures()
 void print_current_room_contents()
 {
 	struct room *room = current_room();
+	int x = 0, y = 32;
+
+	amvprintw(NORMAL, x++, y, "This room contains:\n");
 
 	if (!list_empty(&room->creatures)) {
 		struct creature *creature;
 
 		list_for_each_entry(creature, &room->creatures, list) {
-			printf("%s\n", creature->name);
+			amvprintw(NORMAL, x++, y, "%s", creature->name);
 		}
 	}
 
 	if (room->gold)
-		printf(YELLOW "%d gold coins.\n" NORMAL, room->gold);
+		amvprintw(YELLOW, x++, y, "%d gold coins.", room->gold);
 
 	if (!list_empty(&room->items)) {
 		struct item *item;
 
 		list_for_each_entry(item, &room->items, list) {
-			printf("%s\n", item->name);
+			amvprintw(NORMAL, x++, y, "%s", item->name);
 		}
 	}
 
 	if (room->stairs_down)
-		printf("Stairs leading down.\n");
+		amvprintw(NORMAL, x++, y, "Stairs leading down.");
 
 	if (room->stairs_up)
-		printf("Stairs leading up.\n");
+		amvprintw(NORMAL, x++, y, "Stairs leading up.");
 
 	if (room->store)
-		print_store_inventory(room->store);
+		amvprintw(NORMAL, x++, y, "%s", room->store->name);
 }
 

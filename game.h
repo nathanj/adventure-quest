@@ -3,16 +3,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
 #include <assert.h>
+#include <signal.h>
 
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <curses.h>
 
 #include "list.h"
 #include "colors.h"
 
 struct creature {
-	const char *color;
+	int color;
 	char symbol;
 	char *name;
 
@@ -47,12 +49,12 @@ struct player {
 
 	struct list_head inventory;
 
-	void (*move) (int x, int y, int z);
-	void (*equip) (struct player *this);
+	void (*go) (int x, int y, int z);
+	void (*equip) (struct player *this, struct item *item);
 };
 
 struct store {
-	const char *color;
+	int color;
 	char symbol;
 	char *name;
 
@@ -72,7 +74,7 @@ enum armor_location {
 
 struct item {
 	char *name;
-	const char *color;
+	int color;
 	char symbol;
 
 	enum item_type type;
@@ -122,7 +124,12 @@ void print_current_room_contents();
 struct item *create_random_potion();
 int p(int probability);
 void print_store_inventory(struct store *store);
-void buy_item(struct store *store);
+int buy_item(struct store *store, int i);
+void init_messages();
+void message(int color, const char *fmt, ...);
+void print_messages();
+void finish(int sig);
+int use_item(int i);
 
 extern struct player player;
 

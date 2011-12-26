@@ -13,19 +13,20 @@ const char *suffixes[] = {
 #define NUM_SUFFIXES (sizeof(suffixes) / sizeof(suffixes[0]))
 
 struct item unique_armors[] = {
-	{ "Fuzzy Dice", B_WHITE, '#', ITEM_ARMOR, ARMOR_HEAD, 10, 0, -1, 0 },
+	{ "Fuzzy Dice", B_WHITE, '#', ITEM_ARMOR, ARMOR_HEAD, 10, 0, -1, 0,
+		0, 0, {0, 0}, NULL },
 };
 
 void print_armor(struct item *armor)
 {
-	printf("%s (%d AC", armor->name, armor->armor_class);
+	printw("%s (%d AC", armor->name, armor->armor_class);
 	if (armor->strength)
-		printf(", %d STR", armor->strength);
+		printw(", %d STR", armor->strength);
 	if (armor->intelligence)
-		printf(", %d INT", armor->intelligence);
+		printw(", %d INT", armor->intelligence);
 	if (armor->dexterity)
-		printf(", %d DEX", armor->dexterity);
-	printf(")\n");
+		printw(", %d DEX", armor->dexterity);
+	printw(")");
 }
 
 struct item *create_random_armor()
@@ -47,7 +48,7 @@ struct item *create_random_armor()
 
 	armor->type = ITEM_ARMOR;
 	armor->location = ARMOR_TORSO;
-	armor->armor_class = 3 + rand() % 10;
+	armor->armor_class = 1 + rand() % 2;
 
 	return armor;
 }

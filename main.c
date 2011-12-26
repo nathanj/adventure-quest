@@ -1,128 +1,241 @@
 #include "game.h"
 
-struct player player;
+enum state {
+	WORLD,
+	INVENTORY,
+	STORE
+};
 
-char *prompt()
+enum state state;
+
+void print_prompt()
 {
-	char prompt[128];
+	move(12, 0);
 
-	snprintf(prompt, sizeof(prompt),
-		 GREEN "%d/%d " NORMAL "Health, "
-		 BLUE "%d/%d " NORMAL "Mana, "
-		 "Level " CYAN "%d" NORMAL ","
-		 CYAN" %d " NORMAL "Experience, "
-		 YELLOW "%d " NORMAL "Gold "
-		 "> ",
-		 player.self.health, player.self.max_health,
-		 player.self.mana, player.self.max_mana,
-		 player.self.level,
-		 player.self.experience,
-		 player.gold);
+	aprintw(GREEN, "%d/%d ",
+		player.self.health, player.self.max_health);
+	aprintw(NORMAL, "Health, ");
+	aprintw(BLUE, "%d/%d ", player.self.mana, player.self.max_mana);
+	aprintw(NORMAL, "Mana, Level ");
+	aprintw(CYAN, "%d", player.self.level);
+	aprintw(NORMAL, ", ");
+	aprintw(CYAN, "%d ", player.self.experience);
+	aprintw(NORMAL, "Experience, ");
+	aprintw(YELLOW, "%d ", player.self.experience);
+	aprintw(NORMAL, "Gold");
+}
 
-	return readline(prompt);
+void finish(int sig)
+{
+	(void) sig;
+
+	endwin();
+
+	exit(0);
+}
+
+void init_screen()
+{
+	initscr();
+	keypad(stdscr, TRUE);
+
+	/* Input one character at a time. */
+	cbreak();
+	noecho();
+
+	use_default_colors();
+
+	if (has_colors()) {
+		start_color();
+
+		init_pair(1, COLOR_RED,     -1);
+		init_pair(2, COLOR_GREEN,   -1);
+		init_pair(3, COLOR_YELLOW,  -1);
+		init_pair(4, COLOR_BLUE,    -1);
+		init_pair(5, COLOR_CYAN,    -1);
+		init_pair(6, COLOR_MAGENTA, -1);
+		init_pair(7, COLOR_WHITE,   -1);
+	}
+}
+
+void draw()
+{
+	struct room *room = current_room();
+
+	switch (state) {
+	case WORLD:
+		clear();
+		print_map();
+		print_prompt();
+		print_current_room_contents();
+		print_messages();
+		break;
+	case INVENTORY:
+		clear();
+		print_inventory();
+		break;
+	case STORE:
+		clear();
+		print_store_inventory(room->store);
+		break;
+	}
+}
+
+void handle_attack()
+{
+	struct room *room = current_room();
+	struct creature *creature;
+	int first = 1;
+
+	if (list_empty(&room->creatures)) {
+		message(NORMAL, "There is no one to attack");
+		return;
+	}
+
+	list_for_each_entry(creature, &room->creatures, list) {
+		if (first) {
+			player.self.attack(&player.self, creature);
+			first = 0;
+		}
+
+		if (creature->health > 0)
+			creature->attack(creature, &player.self);
+	}
+}
+
+void handle_take()
+{
+	struct item *item, *n;
+	struct room *room = current_room();
+
+	if (room->gold) {
+		message(NORMAL, "You take %d gold coins.", room->gold);
+		player.gold += room->gold;
+		room->gold = 0;
+	}
+
+	if (!list_empty(&room->items)) {
+
+		list_for_each_entry_safe(item, n, &room->items, list) {
+			message(NORMAL, "You take %s.", item->name);
+			list_add_tail(&item->list, &player.inventory);
+		}
+
+		INIT_LIST_HEAD(&room->items);
+	}
+}
+
+void handle_world_input(int c)
+{
+	struct room *room = current_room();
+
+	switch (c) {
+	case 'a':
+		handle_attack();
+		break;
+	case 'k':
+		player.go(-1, 0, 0);
+		break;
+	case 'j':
+		player.go(1, 0, 0);
+		break;
+	case 'h':
+		player.go(0, -1, 0);
+		break;
+	case 'l':
+		player.go(0, 1, 0);
+		break;
+	case '<':
+		player.go(0, 0, -1);
+		break;
+	case '>':
+		player.go(0, 0, 1);
+		break;
+	case 't':
+		handle_take();
+		break;
+	case 'i':
+		state = INVENTORY;
+		break;
+	case 'b':
+		if (room->store)
+			state = STORE;
+		break;
+	case 'Z':
+		finish(0);
+		break;
+	default:
+		message(NORMAL, "Unknown command: %02x", c);
+		break;
+	}
+}
+
+void handle_inventory_input(int c)
+{
+	switch (c) {
+	case 'z':
+		state = WORLD;
+		break;
+	default:
+		if (use_item(c - 'a'))
+			state = WORLD;
+		break;
+	}
+}
+
+void handle_store_input(int c)
+{
+	struct room *room = current_room();
+
+	switch (c) {
+	case 'z':
+		state = WORLD;
+		break;
+	default:
+		if (buy_item(room->store, c - 'a'))
+			state = WORLD;
+		break;
+	}
+}
+
+void handle_input(int c)
+{
+	switch (state) {
+	case WORLD:
+		handle_world_input(c);
+		break;
+	case INVENTORY:
+		handle_inventory_input(c);
+		break;
+	case STORE:
+		handle_store_input(c);
+		break;
+	}
 }
 
 int main()
 {
-	char *line;
-	struct room *room;
-	struct creature *creature;
+	int c;
+
+	state = WORLD;
 
 	init_world();
 	init_player();
+	init_screen();
+
+	signal(SIGINT, finish);
 
 	while (1) {
-		room = current_room();
+		draw();
 
-		printf("\n\n");
-		print_map();
+		c = getch();
 
-		printf("In this room, there are:\n");
-		print_current_room_contents();
-
-		line = prompt();
-
-		if (strcmp(line, "attack") == 0 || strcmp(line, "a") == 0) {
-			if (!list_empty(&room->creatures)) {
-				int first = 1;
-
-				list_for_each_entry(creature, &room->creatures, list) {
-					if (first) {
-						player.self.attack(&player.self,
-								   creature);
-						first = 0;
-					}
-
-					if (creature->health > 0)
-						creature->attack(creature,
-								 &player.self);
-				}
-			} else {
-				printf("Attack who?\n");
-			}
-		} else if (strcmp(line, "e") == 0) {
-			player.move(0, 1, 0);
-		} else if (strcmp(line, "w") == 0) {
-			player.move(0, -1, 0);
-		} else if (strcmp(line, "n") == 0) {
-			player.move(-1, 0, 0);
-		} else if (strcmp(line, "s") == 0) {
-			player.move(1, 0, 0);
-		} else if (strcmp(line, "u") == 0) {
-			player.move(0, 0, -1);
-		} else if (strcmp(line, "d") == 0) {
-			player.move(0, 0, 1);
-		} else if (strcmp(line, "i") == 0) {
-			print_inventory();
-		} else if (strcmp(line, "b") == 0) {
-			buy_item(room->store);
-		} else if (strcmp(line, "x") == 0) {
-			player.equip(&player);
-		} else if (strcmp(line, "q") == 0) {
-			struct item *item, *n;
-			int used = 0;
-
-			list_for_each_entry_safe(item, n, &player.inventory, list) {
-				if (item->type == ITEM_USE) {
-					printf("You use %s.\n", item->name);
-					item->interact(item, &player);
-					list_del(&item->list);
-					used = 1;
-					break;
-				}
-			}
-
-			if (!used) {
-				printf("You have no items that can be used!\n");
-			}
-		} else if (strcmp(line, "t") == 0) {
-			if (room->gold) {
-				printf("You take %d gold coins.\n", room->gold);
-				player.gold += room->gold;
-				room->gold = 0;
-			}
-
-			if (!list_empty(&room->items)) {
-				struct item *item, *n;
-
-				list_for_each_entry_safe(item, n, &room->items, list) {
-					printf("You take %s.\n", item->name);
-					list_add_tail(&item->list, &player.inventory);
-				}
-
-				INIT_LIST_HEAD(&room->items);
-			}
-		} else if (strcmp(line, "quit") == 0) {
-			free(line);
-			break;
-		} else {
-			printf("Unknown command!\n");
-		}
+		handle_input(c);
 
 		room_remove_dead_creatures();
-
-		free(line);
 	}
+
+	finish(0);
 
 	return 0;
 }

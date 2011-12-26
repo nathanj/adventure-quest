@@ -11,36 +11,52 @@ int calc_price(struct item *item)
 void print_store_inventory(struct store *store)
 {
 	struct item *item;
-	printf("%s\n", store->name);
-	printf("The following items are for sale:\n");
+	char c = 'a';
+
+	amvprintw(NORMAL, 0, 0, "Welcome to %s!\n", store->name);
+	aprintw(NORMAL, "The following items are for sale:\n");
 
 	list_for_each_entry(item, &store->inventory, list) {
-		printf("%s " YELLOW "[%d gold]\n" NORMAL, item->name, calc_price(item));
+		aprintw(BOLD, "%c", c++);
+		aprintw(NORMAL, ": ");
+		aprintw(YELLOW, "[%d gold] ", calc_price(item));
+		aprintw(NORMAL, "");
+		if (item->type == ITEM_ARMOR)
+			print_armor(item);
+		else
+			aprintw(NORMAL, "%s ", item->name);
+		printw("\n");
 	}
+
+	aprintw(BOLD, "z");
+	aprintw(NORMAL, ": Exit\n");
 }
 
-void buy_item(struct store *store)
+int buy_item(struct store *store, int i)
 {
-	struct item *item;
+	struct item *item, *n;
 	int price;
 
-	if (list_empty(&store->inventory)) {
-		printf("There are no items to purchase!\n");
-		return;
+	list_for_each_entry_safe(item, n, &store->inventory, list) {
+		if (i-- == 0) {
+			price = calc_price(item);
+
+			if (price > player.gold) {
+				message(NORMAL, "You do not have enough gold!");
+				return 1;
+			}
+
+			message(NORMAL, "You buy %s for %d gold.",
+				item->name, price);
+
+			player.gold -= price;
+			list_del(&item->list);
+			list_add_tail(&item->list, &player.inventory);
+
+			return 1;
+		}
 	}
 
-	item = list_entry(store->inventory.next, struct item, list);
-	price = calc_price(item);
-
-	if (price > player.gold) {
-		printf("You do not have enough gold!\n");
-		return;
-	}
-
-	printf("You buy %s for %d gold.\n", item->name, price);
-	player.gold -= price;
-	list_del(&item->list);
-	list_add_tail(&item->list, &player.inventory);
+	return 0;
 }
-
 
