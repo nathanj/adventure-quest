@@ -1,0 +1,22 @@
+Adventure Quest
+===============
+
+Introduction
+------------
+
+This is a silly roguelike game I worked on over a Christmas vacation. It
+currently has no goal; just walk around and kill bats and slimes.
+
+Controls
+--------
+hjkl - move (vi controls)
+a    - attack
+b    - buy (when at a shop)
+i    - view/use inventory
+d    - drop
+,    - pick up
+>    - go down stairs
+<    - go up stairs
+
+Z    - exit game
+
