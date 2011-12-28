@@ -39,8 +39,7 @@ void player_hurt(struct creature *this, struct creature *hurter)
 	}
 
 	if (this->health <= 0) {
-		message(NORMAL, "You die!");
-		finish(0);
+		message(B_RED, "You die!");
 	}
 }
 

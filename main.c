@@ -257,6 +257,9 @@ int main()
 	while (1) {
 		draw();
 
+		if (player.self.health <= 0)
+			break;
+
 		c = getch();
 
 		handle_input(c);
@@ -264,7 +267,11 @@ int main()
 		room_remove_dead_creatures();
 	}
 
-	finish(0);
+	endwin();
+
+	if (player.self.health <= 0) {
+		printf("You died! Too bad.\n");
+	}
 
 	return 0;
 }
