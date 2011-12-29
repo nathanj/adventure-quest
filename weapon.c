@@ -24,7 +24,7 @@ static void print(struct item *this)
 	printw(")");
 }
 
-struct item *create_random_weapon()
+struct item *create_random_weapon(int level)
 {
 	int prefix = rand() % NUM_PREFIXES;
 	int suffix = rand() % NUM_SUFFIXES;
@@ -37,7 +37,7 @@ struct item *create_random_weapon()
 	weapon->color = RED;
 	weapon->symbol = ')';
 	weapon->type = ITEM_WEAPON;
-	weapon->damage_roll = rand_between(5, 10);
+	weapon->damage_roll = rand_between(level * 5, level * 10);
 
 	rc = asprintf(&weapon->name, "%s Sword %s",
 		      prefixes[prefix], suffixes[suffix]);

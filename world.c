@@ -78,7 +78,7 @@ void create_monsters()
 			i = rand() % 10;
 			j = rand() % 10;
 
-			switch (rand() % 3) {
+			switch (rand() % 4) {
 			case 0:
 				creature = create_bat();
 				break;
@@ -90,6 +90,12 @@ void create_monsters()
 					creature = create_skeleton();
 				else
 					creature = create_bat();
+				break;
+			case 3:
+				if (l > 1)
+					creature = create_bear();
+				else
+					creature = create_slime();
 				break;
 			default:
 				assert(0);
@@ -115,19 +121,19 @@ void create_store()
 	store->color = B_MAGENTA;
 	INIT_LIST_HEAD(&store->inventory);
 
-	list_add_tail(&(create_random_potion()->list), &store->inventory);
-	list_add_tail(&(create_random_potion()->list), &store->inventory);
-	list_add_tail(&(create_random_potion()->list), &store->inventory);
-	list_add_tail(&(create_random_potion()->list), &store->inventory);
-	list_add_tail(&(create_random_potion()->list), &store->inventory);
+	list_add_tail(&(create_random_potion(1)->list), &store->inventory);
+	list_add_tail(&(create_random_potion(1)->list), &store->inventory);
+	list_add_tail(&(create_random_potion(1)->list), &store->inventory);
+	list_add_tail(&(create_random_potion(1)->list), &store->inventory);
+	list_add_tail(&(create_random_potion(1)->list), &store->inventory);
 
-	list_add_tail(&(create_random_armor()->list), &store->inventory);
-	list_add_tail(&(create_random_armor()->list), &store->inventory);
-	list_add_tail(&(create_random_armor()->list), &store->inventory);
-	list_add_tail(&(create_random_armor()->list), &store->inventory);
-	list_add_tail(&(create_random_armor()->list), &store->inventory);
+	list_add_tail(&(create_random_armor(1)->list), &store->inventory);
+	list_add_tail(&(create_random_armor(1)->list), &store->inventory);
+	list_add_tail(&(create_random_armor(1)->list), &store->inventory);
+	list_add_tail(&(create_random_armor(1)->list), &store->inventory);
+	list_add_tail(&(create_random_armor(1)->list), &store->inventory);
 
-	list_add_tail(&(create_random_weapon()->list), &store->inventory);
+	list_add_tail(&(create_random_weapon(1)->list), &store->inventory);
 
 retry:
 	i = rand() % 10;

@@ -1,7 +1,7 @@
 #include "game.h"
 
 static struct drop_table drop_table[] = {
-	{90, 1, 10, NULL},
+	{90, 1, 30, NULL},
 	{10, 0,  0, create_random_armor},
 	{90, 0,  0, create_random_potion},
 	{0,  0,  0, NULL},

@@ -16,7 +16,7 @@ void creature_die(struct creature *this)
 			message(NORMAL, "%s drops %d gold!", this->name, gold);
 			room->gold += gold;
 		} else {
-			item = drop->creator();
+			item = drop->creator(this->level);
 			message(NORMAL, "%s drops %s!", this->name, item->name);
 			list_add_tail(&item->list, &room->items);
 		}

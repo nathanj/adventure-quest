@@ -31,10 +31,12 @@ struct item potions[] = {
 
 #define NUM_POTIONS (sizeof(potions) / sizeof(potions[0]))
 
-struct item *create_random_potion()
+struct item *create_random_potion(int level)
 {
 	int n = rand() % NUM_POTIONS;
 	struct item *potion;
+
+	(void) level;
 
 	potion = malloc(sizeof(*potion));
 

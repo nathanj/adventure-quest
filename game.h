@@ -19,7 +19,7 @@ struct drop_table {
 	int min_gold;
 	int max_gold;
 
-	struct item *(*creator) ();
+	struct item *(*creator) (int level);
 };
 
 struct creature {
@@ -122,8 +122,9 @@ struct room {
 	struct list_head items;
 };
 
-struct item *create_random_armor();
-struct item *create_random_weapon();
+struct item *create_random_potion(int level);
+struct item *create_random_armor(int level);
+struct item *create_random_weapon(int level);
 void print_armor(struct item *armor);
 void print_weapon(struct item *weapon);
 
@@ -132,6 +133,7 @@ void free_creature(struct creature *creature);
 struct creature *create_bat();
 struct creature *create_slime();
 struct creature *create_skeleton();
+struct creature *create_bear();
 
 void init_player();
 
@@ -141,7 +143,6 @@ struct room *current_room();
 void room_remove_dead_creatures();
 void print_inventory();
 void print_current_room_contents();
-struct item *create_random_potion();
 int p(int probability);
 int rand_between(int a, int b);
 void print_store_inventory(struct store *store);

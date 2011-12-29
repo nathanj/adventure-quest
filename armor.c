@@ -29,13 +29,15 @@ struct item unique_armors[] = {
 		0, 0, 0, {0, 0}, NULL, print },
 };
 
-struct item *create_random_armor()
+struct item *create_random_armor(int level)
 {
 	int prefix = rand() % NUM_PREFIXES;
 	int suffix = rand() % NUM_SUFFIXES;
 	int rc;
 	struct item *armor;
 	const char *type;
+
+	(void) level;
 
 	armor = calloc(1, sizeof(*armor));
 	assert(armor);
