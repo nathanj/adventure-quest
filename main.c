@@ -4,7 +4,9 @@ enum state {
 	WORLD,
 	INVENTORY,
 	DROP,
-	STORE
+	STORE,
+	DEAD,
+	QUIT
 };
 
 enum state state;
@@ -69,6 +71,7 @@ void draw()
 
 	switch (state) {
 	case WORLD:
+	case DEAD:
 		clear();
 		print_map();
 		print_prompt();
@@ -83,6 +86,8 @@ void draw()
 	case STORE:
 		clear();
 		print_store_inventory(room->store);
+		break;
+	case QUIT:
 		break;
 	}
 }
@@ -144,15 +149,19 @@ void handle_world_input(int c)
 		handle_attack();
 		break;
 	case 'k':
+	case KEY_UP:
 		player.go(-1, 0, 0);
 		break;
 	case 'j':
+	case KEY_DOWN:
 		player.go(1, 0, 0);
 		break;
 	case 'h':
+	case KEY_LEFT:
 		player.go(0, -1, 0);
 		break;
 	case 'l':
+	case KEY_RIGHT:
 		player.go(0, 1, 0);
 		break;
 	case '<':
@@ -239,6 +248,12 @@ void handle_input(int c)
 	case STORE:
 		handle_store_input(c);
 		break;
+	case DEAD:
+		if (c == 'Z')
+			state = QUIT;
+		break;
+	case QUIT:
+		break;
 	}
 }
 
@@ -254,11 +269,13 @@ int main()
 
 	signal(SIGINT, finish);
 
-	while (1) {
-		draw();
+	while (state != QUIT) {
+		if (player.self.health <= 0) {
+			message(B_RED, "You died! Press 'Z' to quit.");
+			state = DEAD;
+		}
 
-		if (player.self.health <= 0)
-			break;
+		draw();
 
 		c = getch();
 

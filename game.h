@@ -148,7 +148,8 @@ int rand_between(int a, int b);
 void print_store_inventory(struct store *store);
 int buy_item(struct store *store, int i);
 void init_messages();
-void message(int color, const char *fmt, ...);
+void message(int color, const char *fmt, ...)
+	__attribute__((format(printf,2,3)));
 void print_messages();
 void finish(int sig);
 int use_item(int i);

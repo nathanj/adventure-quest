@@ -10,7 +10,7 @@ static void use_healing_potion(struct item *this, struct player *player)
 	}
 
 	if (this->mana) {
-		message(GREEN, "You heal %d mana!\n", this->mana);
+		message(GREEN, "You heal %d mana!", this->mana);
 		player->self.mana += this->mana;
 		if (player->self.mana > player->self.max_mana)
 			player->self.mana = player->self.max_mana;
