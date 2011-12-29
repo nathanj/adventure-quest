@@ -134,6 +134,7 @@ struct creature *create_bat();
 struct creature *create_slime();
 struct creature *create_skeleton();
 struct creature *create_bear();
+struct creature *create_dragon();
 
 void init_player();
 

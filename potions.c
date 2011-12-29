@@ -19,7 +19,7 @@ static void use_healing_potion(struct item *this, struct player *player)
 
 static void print(struct item *this)
 {
-	aprintw(NORMAL, "%s", this->name);
+	aprintw(this->color, "%s", this->name);
 }
 
 struct item potions[] = {

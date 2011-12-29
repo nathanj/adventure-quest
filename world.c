@@ -106,6 +106,12 @@ void create_monsters()
 				      &world[l][i][j].creatures);
 		}
 	}
+
+	/* Add the dragon on the last floor. */
+	i = rand() % 10;
+	j = rand() % 10;
+	creature = create_dragon();
+	list_add_tail(&creature->list, &world[9][i][j].creatures);
 }
 
 void create_store()
@@ -212,7 +218,9 @@ void print_current_room_contents()
 		struct item *item;
 
 		list_for_each_entry(item, &room->items, list) {
-			amvprintw(NORMAL, x++, y, "%s", item->name);
+			move(x++, y);
+			attrset(NORMAL);
+			item->print(item);
 		}
 	}
 
@@ -223,6 +231,6 @@ void print_current_room_contents()
 		amvprintw(NORMAL, x++, y, "Stairs leading up.");
 
 	if (room->store)
-		amvprintw(NORMAL, x++, y, "%s", room->store->name);
+		amvprintw(B_MAGENTA, x++, y, "%s", room->store->name);
 }
 

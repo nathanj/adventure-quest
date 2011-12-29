@@ -162,14 +162,15 @@ void print_inventory()
 		aprintw(NORMAL, ": ");
 
 		if (item == player.weapon)
-			aprintw(NORMAL, "(Wielded) ");
+			aprintw(BLUE, "(Wielded) ");
 		else if (item == player.armor_head)
-			aprintw(NORMAL, "(Equipped on head) ");
+			aprintw(BLUE, "(Equipped on head) ");
 		else if (item == player.armor_torso)
-			aprintw(NORMAL, "(Equipped on torso) ");
+			aprintw(BLUE, "(Equipped on torso) ");
 		else if (item == player.armor_feet)
-			aprintw(NORMAL, "(Equipped on feet) ");
+			aprintw(BLUE, "(Equipped on feet) ");
 
+		attrset(NORMAL);
 		item->print(item);
 		printw("\n");
 	}

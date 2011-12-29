@@ -37,8 +37,6 @@ struct item *create_random_armor(int level)
 	struct item *armor;
 	const char *type;
 
-	(void) level;
-
 	armor = calloc(1, sizeof(*armor));
 	assert(armor);
 
@@ -61,6 +59,8 @@ struct item *create_random_armor(int level)
 		armor->armor_class = 1 + rand() % 2;
 		break;
 	}
+
+	armor->armor_class *= level;
 
 	rc = asprintf(&armor->name, "%s %s %s",
 		      prefixes[prefix], type, suffixes[suffix]);
