@@ -13,6 +13,15 @@
 #include "list.h"
 #include "colors.h"
 
+struct drop_table {
+	int probability;
+
+	int min_gold;
+	int max_gold;
+
+	struct item *(*creator) ();
+};
+
 struct creature {
 	int color;
 	char symbol;
@@ -32,6 +41,8 @@ struct creature {
 	void (*do_hurt) (struct creature *this, struct creature *hurter);
 	void (*die) (struct creature *this);
 	void (*give_experience) (struct creature *this, int experience);
+
+	struct drop_table *drop_table;
 };
 
 struct player {
@@ -124,6 +135,7 @@ void print_inventory();
 void print_current_room_contents();
 struct item *create_random_potion();
 int p(int probability);
+int rand_between(int a, int b);
 void print_store_inventory(struct store *store);
 int buy_item(struct store *store, int i);
 void init_messages();
@@ -132,6 +144,10 @@ void print_messages();
 void finish(int sig);
 int use_item(int i);
 int drop_item(int i);
+
+void creature_die(struct creature *this);
+void creature_hurt(struct creature *this, struct creature *player);
+void creature_attack(struct creature *this, struct creature *hurter);
 
 extern struct player player;
 

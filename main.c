@@ -13,7 +13,7 @@ void print_prompt()
 {
 	move(12, 0);
 
-	if (player.self.health < player.self.max_health * 0.20)
+	if (player.self.health < player.self.max_health * 0.30)
 		attrset(B_RED);
 	else
 		attrset(GREEN);

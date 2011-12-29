@@ -1,45 +1,11 @@
 #include "game.h"
 
-void bat_attack(struct creature *this, struct creature *player)
-{
-	message(NORMAL, "%s attacks you for %d damage!",
-		this->name, this->strength);
-
-	player->do_hurt(player, this);
-}
-
-void bat_die(struct creature *this)
-{
-	struct room *room = current_room();
-	int gold = p(90) ? rand() % 10 : 0;
-	struct item *armor = p(10) ? create_random_armor() : NULL;
-	struct item *potion = p(90) ? create_random_potion() : NULL;
-
-	if (gold) {
-		message(NORMAL, "%s drops %d gold!", this->name, gold);
-		room->gold += gold;
-	}
-
-	if (armor) {
-		message(NORMAL, "%s drops %s!", this->name, armor->name);
-		list_add_tail(&armor->list, &room->items);
-	}
-
-	if (potion) {
-		message(NORMAL, "%s drops %s!", this->name, potion->name);
-		list_add_tail(&potion->list, &room->items);
-	}
-}
-
-void bat_hurt(struct creature *this, struct creature *hurter)
-{
-	this->health -= hurter->strength;
-	if (this->health <= 0) {
-		message(NORMAL, "%s dies!", this->name);
-		this->die(this);
-		hurter->give_experience(hurter, this->experience);
-	}
-}
+struct drop_table bat_drop_table[] = {
+	{90, 1, 10, NULL},
+	{10, 0,  0, create_random_armor},
+	{90, 0,  0, create_random_potion},
+	{0,  0,  0, NULL},
+};
 
 struct creature *create_bat()
 {
@@ -62,9 +28,12 @@ struct creature *create_bat()
 	bat->level = 1;
 	bat->experience = 20;
 
-	bat->do_hurt = bat_hurt;
-	bat->attack = bat_attack;
-	bat->die = bat_die;
+	bat->do_hurt = creature_hurt;
+	bat->attack = creature_attack;
+	bat->die = creature_die;
+
+	bat->drop_table = bat_drop_table;
+
 
 	return bat;
 }
