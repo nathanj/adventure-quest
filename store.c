@@ -21,10 +21,7 @@ void print_store_inventory(struct store *store)
 		aprintw(NORMAL, ": ");
 		aprintw(YELLOW, "[%d gold] ", calc_price(item));
 		aprintw(NORMAL, "");
-		if (item->type == ITEM_ARMOR)
-			print_armor(item);
-		else
-			aprintw(NORMAL, "%s ", item->name);
+		item->print(item);
 		printw("\n");
 	}
 

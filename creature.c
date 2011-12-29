@@ -28,12 +28,12 @@ void creature_attack(struct creature *this, struct creature *player)
 	message(NORMAL, "%s attacks you for %d damage!",
 		this->name, this->strength);
 
-	player->do_hurt(player, this);
+	player->do_hurt(player, this, this->strength);
 }
 
-void creature_hurt(struct creature *this, struct creature *hurter)
+void creature_hurt(struct creature *this, struct creature *hurter, int damage)
 {
-	this->health -= hurter->strength;
+	this->health -= damage;
 	if (this->health <= 0) {
 		message(NORMAL, "%s dies!", this->name);
 		this->die(this);

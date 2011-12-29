@@ -1,6 +1,6 @@
 #include "game.h"
 
-struct drop_table slime_drop_table[] = {
+static struct drop_table drop_table[] = {
 	{90, 10, 20, NULL},
 	{20, 0,  0,  create_random_armor},
 	{70, 0,  0,  create_random_potion},
@@ -32,7 +32,7 @@ struct creature *create_slime()
 	slime->attack = creature_attack;
 	slime->die = creature_die;
 
-	slime->drop_table = slime_drop_table;
+	slime->drop_table = drop_table;
 
 	return slime;
 }

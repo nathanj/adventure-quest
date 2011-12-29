@@ -78,12 +78,18 @@ void create_monsters()
 			i = rand() % 10;
 			j = rand() % 10;
 
-			switch (rand() % 2) {
+			switch (rand() % 3) {
 			case 0:
 				creature = create_bat();
 				break;
 			case 1:
 				creature = create_slime();
+				break;
+			case 2:
+				if (l > 0)
+					creature = create_skeleton();
+				else
+					creature = create_bat();
 				break;
 			default:
 				assert(0);
@@ -120,6 +126,8 @@ void create_store()
 	list_add_tail(&(create_random_armor()->list), &store->inventory);
 	list_add_tail(&(create_random_armor()->list), &store->inventory);
 	list_add_tail(&(create_random_armor()->list), &store->inventory);
+
+	list_add_tail(&(create_random_weapon()->list), &store->inventory);
 
 retry:
 	i = rand() % 10;

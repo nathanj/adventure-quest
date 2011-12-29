@@ -38,7 +38,7 @@ struct creature {
 	struct list_head list;
 
 	void (*attack) (struct creature *this, struct creature *other);
-	void (*do_hurt) (struct creature *this, struct creature *hurter);
+	void (*do_hurt) (struct creature *this, struct creature *hurter, int damage);
 	void (*die) (struct creature *this);
 	void (*give_experience) (struct creature *this, int experience);
 
@@ -54,6 +54,7 @@ struct player {
 	int world_x;
 	int world_y;
 
+	struct item *weapon;
 	struct item *armor_head;
 	struct item *armor_torso;
 	struct item *armor_feet;
@@ -75,7 +76,8 @@ struct store {
 
 enum item_type {
 	ITEM_USE,
-	ITEM_ARMOR
+	ITEM_ARMOR,
+	ITEM_WEAPON
 };
 
 enum armor_location {
@@ -97,12 +99,15 @@ struct item {
 	int intelligence;
 	int dexterity;
 
+	int damage_roll;
+
 	int health;
 	int mana;
 
 	struct list_head list;
 
 	void (*interact) (struct item *this, struct player *player);
+	void (*print) (struct item *this);
 };
 
 struct room {
@@ -118,12 +123,15 @@ struct room {
 };
 
 struct item *create_random_armor();
+struct item *create_random_weapon();
 void print_armor(struct item *armor);
+void print_weapon(struct item *weapon);
 
 void free_creature(struct creature *creature);
 
 struct creature *create_bat();
 struct creature *create_slime();
+struct creature *create_skeleton();
 
 void init_player();
 
@@ -146,7 +154,7 @@ int use_item(int i);
 int drop_item(int i);
 
 void creature_die(struct creature *this);
-void creature_hurt(struct creature *this, struct creature *player);
+void creature_hurt(struct creature *this, struct creature *player, int damage);
 void creature_attack(struct creature *this, struct creature *hurter);
 
 extern struct player player;

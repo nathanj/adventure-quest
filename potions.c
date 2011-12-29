@@ -1,6 +1,6 @@
 #include "game.h"
 
-void use_healing_potion(struct item *this, struct player *player)
+static void use_healing_potion(struct item *this, struct player *player)
 {
 	if (this->health) {
 		message(GREEN, "You heal %d health!", this->health);
@@ -17,11 +17,16 @@ void use_healing_potion(struct item *this, struct player *player)
 	}
 }
 
+static void print(struct item *this)
+{
+	aprintw(NORMAL, "%s", this->name);
+}
+
 struct item potions[] = {
 	{ "Health Potion", B_GREEN, '!', ITEM_USE, .health = 20,
-		.interact = use_healing_potion },
+		.interact = use_healing_potion, .print = print },
 	{ "Mana Potion",   B_BLUE,  '!', ITEM_USE, .mana = 5,
-		.interact = use_healing_potion },
+		.interact = use_healing_potion, .print = print },
 };
 
 #define NUM_POTIONS (sizeof(potions) / sizeof(potions[0]))

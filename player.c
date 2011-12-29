@@ -4,10 +4,17 @@ struct player player;
 
 void player_attack(struct creature *this, struct creature *creature)
 {
-	message(NORMAL, "You attack %s for %d damage!",
-		creature->name, this->strength);
+	int damage;
+	struct player *player = (struct player *) this;
 
-	creature->do_hurt(creature, this);
+	damage = player->self.strength;
+	if (player->weapon)
+		damage += rand_between(0, player->weapon->damage_roll);
+
+	message(NORMAL, "You attack %s for %d damage!",
+		creature->name, damage);
+
+	creature->do_hurt(creature, this, damage);
 }
 
 int armor_class(struct player *this)
@@ -24,16 +31,16 @@ int armor_class(struct player *this)
 	return ac;
 }
 
-void player_hurt(struct creature *this, struct creature *hurter)
+void player_hurt(struct creature *this, struct creature *hurter, int damage)
 {
 	int ac;
 
 	ac = armor_class((struct player *) this);
 	if (ac == 0) {
-		this->health -= hurter->strength;
+		this->health -= damage;
 	} else if (ac < hurter->strength) {
 		message(NORMAL, "Your armor absorbs some of the blow.");
-		this->health -= hurter->strength - ac;
+		this->health -= damage - ac;
 	} else {
 		message(NORMAL, "Your armor absorbs all of the blow!");
 	}
@@ -90,6 +97,13 @@ void player_give_experience(struct creature *this, int experience)
 
 void player_equip(struct player *this, struct item *item)
 {
+	if (item->type == ITEM_WEAPON) {
+		message(NORMAL, "You wield %s in your hand.",
+			item->name);
+		this->weapon = item;
+		return;
+	}
+
 	switch (item->location) {
 	case ARMOR_HEAD:
 		message(NORMAL, "You equip %s on your head.",
@@ -147,19 +161,17 @@ void print_inventory()
 		aprintw(BOLD, "%c", c++);
 		aprintw(NORMAL, ": ");
 
-		if (item->type == ITEM_ARMOR) {
-			if (item == player.armor_head)
-				aprintw(NORMAL, "(Equipped on head) ");
-			else if (item == player.armor_torso)
-				aprintw(NORMAL, "(Equipped on torso) ");
-			else if (item == player.armor_feet)
-				aprintw(NORMAL, "(Equipped on feet) ");
+		if (item == player.weapon)
+			aprintw(NORMAL, "(Wielded) ");
+		else if (item == player.armor_head)
+			aprintw(NORMAL, "(Equipped on head) ");
+		else if (item == player.armor_torso)
+			aprintw(NORMAL, "(Equipped on torso) ");
+		else if (item == player.armor_feet)
+			aprintw(NORMAL, "(Equipped on feet) ");
 
-			print_armor(item);
-			printw("\n");
-		} else {
-			aprintw(NORMAL, "%s\n", item->name);
-		}
+		item->print(item);
+		printw("\n");
 	}
 
 	aprintw(BOLD, "z");
@@ -181,6 +193,7 @@ int use_item(int i)
 				return 1;
 				break;
 			case ITEM_ARMOR:
+			case ITEM_WEAPON:
 				player.equip(&player, item);
 				return 1;
 				break;

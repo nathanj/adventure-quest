@@ -1,6 +1,6 @@
 #include "game.h"
 
-struct drop_table bat_drop_table[] = {
+static struct drop_table drop_table[] = {
 	{90, 1, 10, NULL},
 	{10, 0,  0, create_random_armor},
 	{90, 0,  0, create_random_potion},
@@ -32,8 +32,7 @@ struct creature *create_bat()
 	bat->attack = creature_attack;
 	bat->die = creature_die;
 
-	bat->drop_table = bat_drop_table;
-
+	bat->drop_table = drop_table;
 
 	return bat;
 }
