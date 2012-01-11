@@ -119,10 +119,13 @@ void create_store()
 	struct store *store;
 	int i, j;
 	struct room *room;
+	int rc;
 
 	store = calloc(1, sizeof(*store));
 
-	asprintf(&store->name, "Merlin's Magic Shop");
+	rc = asprintf(&store->name, "Merlin's Magic Shop");
+	assert(rc != -1);
+
 	store->symbol = '@';
 	store->color = B_MAGENTA;
 	INIT_LIST_HEAD(&store->inventory);

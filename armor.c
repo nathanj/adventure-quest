@@ -35,7 +35,7 @@ struct item *create_random_armor(int level)
 	int suffix = rand() % NUM_SUFFIXES;
 	int rc;
 	struct item *armor;
-	const char *type;
+	const char *type = "";
 
 	armor = calloc(1, sizeof(*armor));
 	assert(armor);
