@@ -8,11 +8,32 @@
 #include <assert.h>
 #include <signal.h>
 #include <math.h>
+#include <time.h>
 
 #include <curses.h>
 
 #include "list.h"
 #include "colors.h"
+
+#define HEIGHT 24
+#define WIDTH 80
+
+struct node {
+	int x, y;
+	int h; /* the hueristic */
+	struct node *parent;
+};
+
+struct node_list {
+	struct node node;
+	struct node_list *next;
+};
+void init_node_list(struct node_list *n);
+int heuristic(int x, int y, int tx, int ty);
+void search_nodes(struct node_list *open, struct node_list *closed,
+		  struct node_list *entry, int tx, int ty, int level,
+		  int want_open);
+void generate_world();
 
 struct drop_table {
 	int probability;
@@ -112,6 +133,7 @@ struct item {
 };
 
 struct room {
+	int open : 1;
 	int stairs_down : 1;
 	int stairs_up : 1;
 
@@ -163,6 +185,7 @@ void creature_hurt(struct creature *this, struct creature *player, int damage);
 void creature_attack(struct creature *this, struct creature *hurter);
 
 extern struct player player;
+extern struct room world[10][HEIGHT][WIDTH];
 
 #endif /* __GAME_H__ */
 

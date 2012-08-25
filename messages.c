@@ -45,7 +45,7 @@ void print_messages()
 {
 	int i, j;
 
-	move(13, 0);
+	move(25, 0);
 	for (i = 0; i < NUM_MESSAGES; i++) {
 		j = (last_msg_num + i) % NUM_MESSAGES;
 

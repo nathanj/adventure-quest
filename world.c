@@ -1,6 +1,6 @@
 #include "game.h"
 
-struct room world[10][10][10];
+struct room world[10][HEIGHT][WIDTH];
 
 void print_room(int i, int j)
 {
@@ -25,11 +25,13 @@ void print_room(int i, int j)
 	} else if (room->store) {
 		aprintw(room->store->color, "%c", room->store->symbol);
 	} else if (room->stairs_down) {
-		printw(">");
+		aprintw(NORMAL, ">");
 	} else if (room->stairs_up) {
-		printw("<");
+		aprintw(NORMAL, "<");
+	} else if (room->open) {
+		aprintw(NORMAL, ".");
 	} else {
-		printw(" ");
+		aprintw(NORMAL, "#");
 	}
 }
 
@@ -37,33 +39,74 @@ void print_map()
 {
 	int i, j;
 
-	move(0, 0);
-
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < HEIGHT; i++) {
 		move(i, 0);
-		for (j = 0; j < 10; j++) {
-			aprintw(NORMAL, "[");
+		for (j = 0; j < WIDTH; j++)
 			print_room(i, j);
-			aprintw(NORMAL, "]");
-		}
 	}
+}
+
+static int is_path_between_stairs(int level, int ux, int uy, int dx, int dy)
+{
+	struct node_list open, closed;
+	struct node_list start;
+
+	init_node_list(&open);
+	init_node_list(&start);
+	init_node_list(&closed);
+
+	start.node.x = ux;
+	start.node.y = uy;
+	start.node.h = heuristic(ux, uy, dx, dy);
+
+	open.next = &start;
+
+	while (open.next) {
+		if (open.next->node.x == dx && open.next->node.y == dy)
+			return 1;
+
+		search_nodes(&open, &closed, open.next, dx, dy, level, 1);
+	}
+
+	return 0;
 }
 
 void create_stairs()
 {
 	int l, i, j;
 
-	for (l = 0; l < 9; l++) {
+	for (l = 0; l < 10; l++) {
+		int ux, uy;
+		int dx, dy;
 retry:
-		i = rand() % 10;
-		j = rand() % 10;
+		do {
+			i = rand() % HEIGHT;
+			j = rand() % WIDTH;
+		} while (!world[l][i][j].open);
 
-		/* Cannot have both sets of stairs on same room. */
-		if (world[l][i][j].stairs_up)
+		dx = j;
+		dy = i;
+
+		do {
+			i = rand() % HEIGHT;
+			j = rand() % WIDTH;
+		} while (!(world[l][i][j].open
+			   && !world[l][i][j].stairs_down));
+
+		ux = j;
+		uy = i;
+
+		if (!is_path_between_stairs(l, ux, uy, dx, dy))
 			goto retry;
 
-		world[l][i][j].stairs_down = 1;
-		world[l+1][i][j].stairs_up = 1;
+		if (l < 9)
+			world[l][dy][dx].stairs_down = 1;
+		if (l == 0) {
+			player.world_x = uy;
+			player.world_y = ux;
+		} else {
+			world[l][uy][ux].stairs_up = 1;
+		}
 	}
 }
 
@@ -73,11 +116,8 @@ void create_monsters()
 	int n, i, j, l;
 	struct creature *creature;
 
-	for (l = 0; l < num; l++) {
+	for (l = 0; l < 10; l++) {
 		for (n = 0; n < num; n++) {
-			i = rand() % 10;
-			j = rand() % 10;
-
 			switch (rand() % 4) {
 			case 0:
 				creature = create_bat();
@@ -102,14 +142,21 @@ void create_monsters()
 				break;
 			}
 
+			do {
+				i = rand() % HEIGHT;
+				j = rand() % WIDTH;
+			} while (!world[l][i][j].open);
+
 			list_add_tail(&creature->list,
 				      &world[l][i][j].creatures);
 		}
 	}
 
 	/* Add the dragon on the last floor. */
-	i = rand() % 10;
-	j = rand() % 10;
+	do {
+		i = rand() % HEIGHT;
+		j = rand() % WIDTH;
+	} while (!world[9][i][j].open);
 	creature = create_dragon();
 	list_add_tail(&creature->list, &world[9][i][j].creatures);
 }
@@ -144,13 +191,12 @@ void create_store()
 
 	list_add_tail(&(create_random_weapon(1)->list), &store->inventory);
 
-retry:
-	i = rand() % 10;
-	j = rand() % 10;
-	room = &world[0][i][j];
-	if (room->stairs_up || room->stairs_down
-	    || !list_empty(&room->creatures))
-		goto retry;
+	do {
+		i = rand() % HEIGHT;
+		j = rand() % WIDTH;
+		room = &world[0][i][j];
+	} while (!(room->open && !room->stairs_up && !room->stairs_down
+		   && list_empty(&room->creatures)));
 
 	room->store = store;
 }
@@ -160,10 +206,11 @@ void init_world()
 	int l, i, j;
 
 	memset(world, 0, sizeof(world));
+	generate_world();
 
 	for (l = 0; l < 10; l++) {
-		for (i = 0; i < 10; i++) {
-			for (j = 0; j < 10; j++) {
+		for (i = 0; i < HEIGHT; i++) {
+			for (j = 0; j < WIDTH; j++) {
 				INIT_LIST_HEAD(&world[l][i][j].creatures);
 				INIT_LIST_HEAD(&world[l][i][j].items);
 			}
@@ -202,7 +249,7 @@ void room_remove_dead_creatures()
 void print_current_room_contents()
 {
 	struct room *room = current_room();
-	int x = 0, y = 32;
+	int x = 0, y = 81;
 
 	amvprintw(NORMAL, x++, y, "This room contains:\n");
 
@@ -236,4 +283,3 @@ void print_current_room_contents()
 	if (room->store)
 		amvprintw(B_MAGENTA, x++, y, "%s", room->store->name);
 }
-

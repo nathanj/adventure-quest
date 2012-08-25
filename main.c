@@ -13,7 +13,7 @@ enum state state;
 
 void print_prompt()
 {
-	move(12, 0);
+	move(24, 0);
 
 	if (player.self.health < player.self.max_health * 0.30)
 		attrset(B_RED);
@@ -34,9 +34,8 @@ void print_prompt()
 
 void finish(int sig)
 {
-	(void) sig;
-
 	endwin();
+	printf("got signal %d\n", sig);
 
 	exit(0);
 }
@@ -260,14 +259,20 @@ void handle_input(int c)
 int main()
 {
 	int c;
+	time_t seed = 1345933961;
+
+	seed = time(NULL);
+	printf("seed=%lu\n", time(NULL));
+	srand(seed);
 
 	state = WORLD;
 
-	init_world();
 	init_player();
+	init_world();
 	init_screen();
 
 	signal(SIGINT, finish);
+	signal(SIGSEGV, finish);
 
 	while (state != QUIT) {
 		if (player.self.health <= 0) {

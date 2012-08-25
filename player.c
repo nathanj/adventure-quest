@@ -50,23 +50,49 @@ void player_hurt(struct creature *this, struct creature *hurter, int damage)
 	}
 }
 
+static void go_to_stairs(int up)
+{
+	int i, j;
+
+	for (i = 0; i < HEIGHT; i++) {
+		for (j = 0; j < WIDTH; j++) {
+			if (up && world[player.world_level][i][j].stairs_down) {
+				player.world_x = i;
+				player.world_y = j;
+				return;
+			} else if (!up && world[player.world_level][i][j].stairs_up) {
+				player.world_x = i;
+				player.world_y = j;
+				return;
+			}
+		}
+	}
+}
+
 void player_go(int x, int y, int z)
 {
 	struct room *room = current_room();
+	int pl = player.world_level;
+	int px = player.world_x;
+	int py = player.world_y;
 
-	if (z > 0 && room->stairs_down)
+	if (z > 0 && room->stairs_down) {
 		player.world_level += z;
-	if (z < 0 && room->stairs_up)
+		go_to_stairs(0);
+	}
+	if (z < 0 && room->stairs_up) {
 		player.world_level += z;
+		go_to_stairs(1);
+	}
 
-	if (x > 0 && player.world_x < 9)
+	if (x > 0 && player.world_x < HEIGHT - 1 && world[pl][px + x][py].open)
 		player.world_x += x;
-	if (x < 0 && player.world_x > 0)
+	if (x < 0 && player.world_x > 0 && world[pl][px + x][py].open)
 		player.world_x += x;
 
-	if (y > 0 && player.world_y < 9)
+	if (y > 0 && player.world_y < WIDTH - 1 && world[pl][px][py + y].open)
 		player.world_y += y;
-	if (y < 0 && player.world_y > 0)
+	if (y < 0 && player.world_y > 0 && world[pl][px][py + y].open)
 		player.world_y += y;
 }
 
