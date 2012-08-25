@@ -7,6 +7,7 @@
 #include <string.h>
 #include <assert.h>
 #include <signal.h>
+#include <math.h>
 
 #include <curses.h>
 
@@ -146,6 +147,7 @@ void print_inventory();
 void print_current_room_contents();
 int p(int probability);
 int rand_between(int a, int b);
+int rand_normal(int mean, int stddev);
 void print_store_inventory(struct store *store);
 int buy_item(struct store *store, int i);
 void init_messages();
