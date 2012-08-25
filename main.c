@@ -149,25 +149,37 @@ void handle_world_input(int c)
 		break;
 	case 'k':
 	case KEY_UP:
-		player.go(-1, 0, 0);
+		player.go(-1, 0, 0, 0);
+		break;
+	case 'K':
+		player.go(-1, 0, 0, 1);
 		break;
 	case 'j':
 	case KEY_DOWN:
-		player.go(1, 0, 0);
+		player.go(1, 0, 0, 0);
+		break;
+	case 'J':
+		player.go(1, 0, 0, 1);
 		break;
 	case 'h':
 	case KEY_LEFT:
-		player.go(0, -1, 0);
+		player.go(0, -1, 0, 0);
+		break;
+	case 'H':
+		player.go(0, -1, 0, 1);
 		break;
 	case 'l':
 	case KEY_RIGHT:
-		player.go(0, 1, 0);
+		player.go(0, 1, 0, 0);
+		break;
+	case 'L':
+		player.go(0, 1, 0, 1);
 		break;
 	case '<':
-		player.go(0, 0, -1);
+		player.go(0, 0, -1, 0);
 		break;
 	case '>':
-		player.go(0, 0, 1);
+		player.go(0, 0, 1, 0);
 		break;
 	case ',':
 		handle_take();

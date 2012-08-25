@@ -69,7 +69,14 @@ static void go_to_stairs(int up)
 	}
 }
 
-void player_go(int x, int y, int z)
+static int is_interesting(struct room *room)
+{
+	return (room->stairs_down || room->stairs_up || room->gold
+		|| room->store || !list_empty(&room->creatures)
+		|| !list_empty(&room->items));
+}
+
+void player_go(int x, int y, int z, int until_interesting)
 {
 	struct room *room = current_room();
 	int pl = player.world_level;
@@ -94,6 +101,10 @@ void player_go(int x, int y, int z)
 		player.world_y += y;
 	if (y < 0 && player.world_y > 0 && world[pl][px][py + y].open)
 		player.world_y += y;
+
+	if ((px != player.world_x || py != player.world_y)
+	    && until_interesting && !is_interesting(current_room()))
+		player_go(x, y, z, until_interesting);
 }
 
 void level_up(struct creature *this)

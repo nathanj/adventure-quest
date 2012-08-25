@@ -84,7 +84,7 @@ struct player {
 	int num_items;
 	struct list_head inventory;
 
-	void (*go) (int x, int y, int z);
+	void (*go) (int x, int y, int z, int until_interesting);
 	void (*equip) (struct player *this, struct item *item);
 };
 

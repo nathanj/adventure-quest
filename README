@@ -11,6 +11,7 @@ evil dragon that has been terrorizing your village.
 Controls
 --------
 hjkl - move (vi controls)
+HJKL - move until interesting
 a    - attack
 b    - buy (when at a shop)
 i    - view/use inventory
