@@ -4,7 +4,7 @@ CFLAGS  := --std=gnu99 -D_GNU_SOURCE -Wall -Wextra -Werror -g -O0 -MMD
 LDFLAGS := -lncurses
 SRCS    := $(wildcard *.c)
 OBJS    := $(SRCS:.c=.o)
-DEPS    := $(wildcard *.d)
+DEPS    := $(SRCS:.c=.d)
 
 all: $(TARGET)
 
@@ -15,7 +15,4 @@ clean:
 
 .PHONY: clean
 
-ifneq ($(DEPS),)
-include $(DEPS)
-endif
-
+sinclude $(DEPS)
