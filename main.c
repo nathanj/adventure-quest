@@ -292,6 +292,7 @@ int main()
 			state = DEAD;
 		}
 
+		handle_lighting();
 		draw();
 
 		c = getch();

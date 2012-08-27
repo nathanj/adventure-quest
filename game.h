@@ -34,6 +34,7 @@ void search_nodes(struct node_list *open, struct node_list *closed,
 		  struct node_list *entry, int tx, int ty, int level,
 		  int want_open);
 void generate_world();
+void handle_lighting();
 
 struct drop_table {
 	int probability;
@@ -134,6 +135,7 @@ struct item {
 
 struct room {
 	int open : 1;
+	int lit : 1;
 	int stairs_down : 1;
 	int stairs_up : 1;
 

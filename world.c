@@ -10,6 +10,11 @@ void print_room(int i, int j)
 
 	struct room *room = &world[l][i][j];
 
+	if (!room->lit) {
+		printw(" ");
+		return;
+	}
+
 	if (x == i && y == j) {
 		aprintw(B_RED, "X");
 	} else if (!list_empty(&room->creatures)) {
@@ -282,4 +287,59 @@ void print_current_room_contents()
 
 	if (room->store)
 		amvprintw(B_MAGENTA, x++, y, "%s", room->store->name);
+}
+
+#define RANGE 10
+
+struct vis {
+	int can_see : 1;
+};
+
+static void handle_light_direction(int px, int py, struct vis (*vis)[WIDTH],
+				   int num, float dx, float dy)
+{
+	int i;
+	float x, y;
+
+	for (i = 0, x = px, y = py; i < num; i++, x += dx, y += dy) {
+		int a = (int) x;
+		int b = (int) y;
+		if (a < 0 || a >= HEIGHT)
+			break;
+		if (b < 0 || b >= WIDTH)
+			break;
+		vis[a][b].can_see = 1;
+		if (!world[player.world_level][a][b].open)
+			break;
+	}
+}
+
+void handle_lighting()
+{
+	int pl = player.world_level;
+	int px = player.world_x;
+	int py = player.world_y;
+	int i, j;
+
+	struct vis vis[HEIGHT][WIDTH];
+
+	memset(&vis, 0, sizeof(vis));
+
+	for (i = 0; i < RANGE * 10 + 1; i++) {
+		float angle = i * M_PI_2 / RANGE / 10;
+		float dx = cosf(angle);
+		float dy = sinf(angle);
+
+		handle_light_direction(px, py, vis, RANGE, +dx, +dy);
+		handle_light_direction(px, py, vis, RANGE, +dx, -dy);
+		handle_light_direction(px, py, vis, RANGE, -dx, +dy);
+		handle_light_direction(px, py, vis, RANGE, -dx, -dy);
+	}
+
+	for (i = 0; i < HEIGHT; i++) {
+		for (j = 0; j < WIDTH; j++) {
+			if (vis[i][j].can_see)
+				world[pl][i][j].lit = 1;
+		}
+	}
 }

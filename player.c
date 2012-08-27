@@ -103,8 +103,10 @@ void player_go(int x, int y, int z, int until_interesting)
 		player.world_y += y;
 
 	if ((px != player.world_x || py != player.world_y)
-	    && until_interesting && !is_interesting(current_room()))
+	    && until_interesting && !is_interesting(current_room())) {
+		handle_lighting();
 		player_go(x, y, z, until_interesting);
+	}
 }
 
 void level_up(struct creature *this)
