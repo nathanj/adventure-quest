@@ -42,6 +42,8 @@ void finish(int sig)
 
 void init_screen()
 {
+	int x, y;
+
 	initscr();
 	keypad(stdscr, TRUE);
 
@@ -61,6 +63,13 @@ void init_screen()
 		init_pair(5, COLOR_CYAN,    -1);
 		init_pair(6, COLOR_MAGENTA, -1);
 		init_pair(7, COLOR_WHITE,   -1);
+	}
+
+	getmaxyx(stdscr, y, x);
+	if (y < 35 || x < 120) {
+		endwin();
+		printf("Terminal must be 120x35 or larger!\n");
+		exit(0);
 	}
 }
 
