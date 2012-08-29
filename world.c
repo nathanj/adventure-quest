@@ -302,8 +302,8 @@ static void handle_light_direction(int px, int py, struct vis (*vis)[WIDTH],
 	float x, y;
 
 	for (i = 0, x = px, y = py; i < num; i++, x += dx, y += dy) {
-		int a = (int) x;
-		int b = (int) y;
+		int a = lroundf(x);
+		int b = lroundf(y);
 		if (a < 0 || a >= HEIGHT)
 			break;
 		if (b < 0 || b >= WIDTH)
