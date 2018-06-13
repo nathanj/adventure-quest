@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #ifndef __GAME_H__
 #define __GAME_H__
 
